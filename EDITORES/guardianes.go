@@ -3,17 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
-	"time"
 	"os"
+	"time"
 
 	pb "github.com/Kendovvul/Ejemplo/Proto"
 	"google.golang.org/grpc"
 )
 
-
-//Funcion para comunicarse con el namenode y dependiendo del input de la funcion si es que realiza un fetch o un cierre de los programas.
 func Comunicacion(DataTipo string) {
-	//Conexion con namenode
 	connS, err := grpc.Dial("dist041:50051", grpc.WithInsecure())
 
 	if err != nil {
@@ -30,7 +27,7 @@ func Comunicacion(DataTipo string) {
 			&pb.Message{
 				Body: DataTipo,
 			})
-		
+
 		if err != nil {
 			panic("No se puede crear el mensaje " + err.Error())
 		}

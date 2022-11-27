@@ -18,15 +18,15 @@ func ServidorRandom() (Nombre_DateNode string, IP string) {
 	rand.Seed(time.Now().UnixNano())
 	switch os := rand.Intn(3); os {
 	case 0:
-		Nombre := "Servidor Tierra"
+		Nombre := "ServidorTierra"
 		IP := "dist042:50051"
 		return Nombre, IP
 	case 1:
-		Nombre := "DateNode Synth"
+		Nombre := "ServidorMarte"
 		IP := "dist043:50051"
 		return Nombre, IP
 	default:
-		Nombre := "DateNode Cremator"
+		Nombre := "ServidorTitan"
 		IP := "dist044:50051"
 		return Nombre, IP
 	}
