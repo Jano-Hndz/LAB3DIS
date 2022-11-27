@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"math/rand"
 	"net"
 	"strings"
@@ -13,7 +11,30 @@ import (
 	"google.golang.org/grpc"
 )
 
-//Se retorna un DatoNode con su ip al azar para guardar la data
+func EnviarPeticion(ip string, peticion string) string {
+
+	connS, err := grpc.Dial(ip, grpc.WithInsecure())
+
+	if err != nil {
+		panic("No se pudo conectar con el servidor" + err.Error())
+	}
+	defer connS.Close()
+
+	serviceCliente := pb.NewMessageServiceClient(connS)
+
+	res, err := serviceCliente.Intercambio(context.Background(),
+		&pb.Message{
+			Body: peticion,
+		})
+
+	if err != nil {
+		panic("No se puede crear el mensaje " + err.Error())
+	}
+
+	return res.Body
+}
+
+//Se retorna  un servidor randmo
 func ServidorRandom() (Nombre_DateNode string, IP string) {
 	rand.Seed(time.Now().UnixNano())
 	switch os := rand.Intn(3); os {
@@ -32,169 +53,18 @@ func ServidorRandom() (Nombre_DateNode string, IP string) {
 	}
 }
 
-//Se guarda el dato en un DateNode al azar
-func GuardarDATA(data string) {
-
-	Split_Msj := strings.Split(data, ":")
-	Tipo := Split_Msj[0]
-	ID := Split_Msj[1]
-
-	NAMEDATENODE, IPNODE := DateNodeRandom()
-
-	_, err := file.WriteString(Tipo + ":" + ID + ":" + NAMEDATENODE + "\n")
-
-	if err != nil {
-		log.Fatalf("failed creating file: %s", err)
+func NombreServer(ip string) string {
+	switch ip {
+	case "dist042:50051":
+		Nombre := "ServidorTierra"
+		return Nombre
+	case "dist043:50051":
+		Nombre := "ServidorMarte"
+		return Nombre
+	case "dist044:50051":
+		Nombre := "ServidorTitan"
+		return Nombre
 	}
-
-	err = file.Sync()
-
-	if err != nil {
-		log.Fatalf("failed creating file: %s", err)
-	}
-
-	connS, err := grpc.Dial(IPNODE, grpc.WithInsecure())
-
-	if err != nil {
-		panic("No se pudo conectar con el servidor" + err.Error())
-	}
-
-	defer connS.Close()
-
-	serviceCliente := pb.NewMessageServiceClient(connS)
-
-	//envia el mensaje al laboratorio
-	res, err := serviceCliente.Intercambio(context.Background(),
-		&pb.Message{
-			Body: "0:" + data,
-		})
-
-	if err != nil {
-		panic("No se puede crear el mensaje " + err.Error())
-	}
-
-	fmt.Println(res.Body) //respuesta del laboratorio
-	time.Sleep(1 * time.Second)
-
-}
-
-//Se consulta a cada DataNode por los datos de un tipo en especifico y retorna un string con todos
-func Fetch_Rebeldes(tipo string) string {
-
-	Respuesta := ""
-
-	//CONEXION DATANODE 1
-	connS, err := grpc.Dial("dist042:50051", grpc.WithInsecure())
-	if err != nil {
-		panic("No se pudo conectar con el servidor" + err.Error())
-	}
-	defer connS.Close()
-
-	serviceCliente := pb.NewMessageServiceClient(connS)
-
-	res, err := serviceCliente.Intercambio(context.Background(),
-		&pb.Message{
-			Body: "1:" + tipo,
-		})
-	if err != nil {
-		panic("No se puede crear el mensaje " + err.Error())
-	}
-
-	Respuesta = Respuesta + res.Body
-
-	//CONEXION DATANODE 2
-	connS, err = grpc.Dial("dist043:50051", grpc.WithInsecure())
-
-	if err != nil {
-		panic("No se pudo conectar con el servidor" + err.Error())
-	}
-
-	defer connS.Close()
-
-	serviceCliente = pb.NewMessageServiceClient(connS)
-
-	res, err = serviceCliente.Intercambio(context.Background(),
-		&pb.Message{
-			Body: "1:" + tipo,
-		})
-	if err != nil {
-		panic("No se puede crear el mensaje " + err.Error())
-	}
-
-	Respuesta = Respuesta + res.Body
-
-	//CONEXION DATANODE 3
-	connS, err = grpc.Dial("dist044:50051", grpc.WithInsecure())
-	if err != nil {
-		panic("No se pudo conectar con el servidor" + err.Error())
-	}
-
-	defer connS.Close()
-
-	serviceCliente = pb.NewMessageServiceClient(connS)
-
-	res, err = serviceCliente.Intercambio(context.Background(),
-		&pb.Message{
-			Body: "1:" + tipo,
-		})
-	if err != nil {
-		panic("No se puede crear el mensaje " + err.Error())
-	}
-
-	Respuesta = Respuesta + res.Body
-
-	RetornarString := Ordenar(Respuesta, tipo)
-
-	return RetornarString
-}
-
-//Se maneja el cierre de los programas
-func Cierre() {
-
-	//CONEXION DATANODE 1
-	connS, err := grpc.Dial("dist042:50051", grpc.WithInsecure())
-	if err != nil {
-		panic("No se pudo conectar con el servidor" + err.Error())
-	}
-	defer connS.Close()
-
-	serviceCliente := pb.NewMessageServiceClient(connS)
-
-	_, _ = serviceCliente.Intercambio(context.Background(),
-		&pb.Message{
-			Body: "CIERRE",
-		})
-
-	//CONEXION DATANODE 2
-	connS, err = grpc.Dial("dist043:50051", grpc.WithInsecure())
-
-	if err != nil {
-		panic("No se pudo conectar con el servidor" + err.Error())
-	}
-
-	defer connS.Close()
-
-	serviceCliente = pb.NewMessageServiceClient(connS)
-
-	_, _ = serviceCliente.Intercambio(context.Background(),
-		&pb.Message{
-			Body: "CIERRE",
-		})
-
-	//CONEXION DATANODE 3
-	connS, err = grpc.Dial("dist044:50051", grpc.WithInsecure())
-	if err != nil {
-		panic("No se pudo conectar con el servidor" + err.Error())
-	}
-
-	defer connS.Close()
-
-	serviceCliente = pb.NewMessageServiceClient(connS)
-
-	_, _ = serviceCliente.Intercambio(context.Background(),
-		&pb.Message{
-			Body: "CIERRE",
-		})
 
 }
 
@@ -205,8 +75,34 @@ type server struct {
 
 //Se maneja el intercambio de mensajes
 func (s *server) Intercambio(ctx context.Context, msg *pb.Message) (*pb.Message, error) {
+	var msn string
+	Split_Msj := strings.Split(msg.Body, " ")
+
+	if Split_Msj[0] == "0" {
+
+		//Peticion Vanguardia
+		var nombre string
+		var ip string
+
+		if Split_Msj[1] == "0" {
+			nombre, ip = ServidorRandom()
+		} else {
+			ip = Split_Msj[1]
+			nombre = NombreServer(ip)
+		}
+
+		print(msg.Body + "\n" + ip + "->" + nombre)
+
+		msn := EnviarPeticion(ip, msg.Body)
+
+		print(msn)
+
+	} else {
+		//Peticion Guardianes
+	}
 
 	return &pb.Message{Body: msn}, nil
+
 }
 
 func main() {

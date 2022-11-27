@@ -2,31 +2,15 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"log"
-	"math/rand"
 	"os"
 	"strings"
-	"time"
-)
 
-func ServidorRandom() (Nombre_DateNode string, IP string) {
-	rand.Seed(time.Now().UnixNano())
-	switch os := rand.Intn(3); os {
-	case 0:
-		Nombre := "ServidorTierra"
-		IP := "dist042:50051"
-		return Nombre, IP
-	case 1:
-		Nombre := "ServidorMarte"
-		IP := "dist043:50051"
-		return Nombre, IP
-	default:
-		Nombre := "ServidorTitan"
-		IP := "dist044:50051"
-		return Nombre, IP
-	}
-}
+	pb "github.com/Kendovvul/Ejemplo/Proto"
+	"google.golang.org/grpc"
+)
 
 func SolicitarInput() string {
 	fmt.Println("> POR FAVOR ESCRIBIR SOLICITUD : ")
@@ -47,17 +31,17 @@ func SolicitarInput() string {
 	return solicitud
 }
 
-func Revisar(camp string, ip string, solicitud string) (string, int) {
+func Revisar(camp string, ip string, solicitud string) string {
 
 	solicitud_lista := strings.Split(solicitud, " ")
 	revi := strings.Split(camp, " ")
 
 	if solicitud_lista[1] == revi[0] && solicitud_lista[2] == revi[1] {
 		solicitud = "0 " + ip + " " + solicitud
-		return solicitud, 0
+		return solicitud
 	}
 	solicitud = "0 0 " + solicitud
-	return solicitud, 1
+	return solicitud
 }
 
 func main() {
@@ -66,27 +50,36 @@ func main() {
 	ip := "1"
 
 	for {
-		var b int
+
+		connS, err := grpc.Dial("dist041:50051", grpc.WithInsecure())
+
+		if err != nil {
+			panic("No se pudo conectar con el servidor" + err.Error())
+		}
+		defer connS.Close()
+
 		var input string
 
 		input = SolicitarInput()
 		println(input)
 
-		input, b = Revisar(Camp, ip, input)
+		input = Revisar(Camp, ip, input)
 
 		lis_inp := strings.Split(input, " ")
 		Camp = lis_inp[3] + " " + lis_inp[4]
 
-		if b == 1 {
-			_, ipp := ServidorRandom()
-			ip = ipp
+		serviceCliente := pb.NewMessageServiceClient(connS)
+
+		res, err := serviceCliente.Intercambio(context.Background(),
+			&pb.Message{
+				Body: input,
+			})
+
+		if err != nil {
+			panic("No se puede crear el mensaje " + err.Error())
 		}
 
-		println(input)
-
-		println(Camp)
-
-		println(ip)
+		print(res.Body)
 	}
 
 }
