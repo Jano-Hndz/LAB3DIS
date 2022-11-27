@@ -38,7 +38,7 @@ func main() {
 		var input []string
 
 		input = SolicitarInput()
-		
+
 		//Conexion con namenode
 		connS, err := grpc.Dial("dist041:50051", grpc.WithInsecure())
 

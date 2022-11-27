@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"context"
-	"log"
 	"net"
 	"os"
 	"strings"
@@ -11,37 +9,6 @@ import (
 	pb "github.com/Kendovvul/Ejemplo/Proto"
 	"google.golang.org/grpc"
 )
-
-//Se crea variable file para que pueda ser accedida desde todo el codigo
-var file, err = os.Create("DATA.txt")
-
-//Busca en el archivo data la información con el tipo indicado
-func RetornarData(Tipo string) string {
-
-	file1, err1 := os.Open("DATA.txt")
-
-	if err1 != nil {
-		log.Fatalf("failed creating file: %s", err1)
-	}
-
-	StringRetorno := ""
-
-	scanner := bufio.NewScanner(file1)
-
-	for scanner.Scan() {
-
-		Split_Msj := strings.Split(scanner.Text(), ":")
-
-		if Split_Msj[0] == Tipo {
-
-			StringRetorno = StringRetorno + Split_Msj[1] + ":" + Split_Msj[2] + "\n"
-
-		}
-	}
-
-	file1.Close()
-	return StringRetorno
-}
 
 //Estructura para usar con facilidad el server
 type server struct {

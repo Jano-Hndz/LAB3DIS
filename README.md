@@ -9,13 +9,13 @@ Alejandro Hernández - 201723540-3
 
 ### Para ejecutar:
 
--dist041: En esta maquina se tiene que ejecutar el comando "make docker-namenode"
+-dist041: Broker
 
--dist042: En esta maquina se tiene         que ejecutar el comando "make docker-datanode"
+-dist042: Tierra
 
--dist043: En esta maquina se tiene que ejecutar el comando "make docker-datanode" al igual que "make docker-combine"
+-dist043: Marte -----Vanguardia
 
--dist044: En esta maquian se tiene que ejecutar el comando "make docker-datanode" al igual que "make docker-rebeldes"
+-dist044: Titan ------Guardianes
 
 
 ### Aclaraciones:

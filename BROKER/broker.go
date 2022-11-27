@@ -1,13 +1,11 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"log"
 	"math/rand"
 	"net"
-	"os"
 	"strings"
 	"time"
 
@@ -15,86 +13,12 @@ import (
 	"google.golang.org/grpc"
 )
 
-//Se crea variable file para que pueda ser accedida desde todo el codigo
-var file, err = os.Create("DATA.txt")
-
-//Se ordenan los datos segun el orden de guardado
-func Ordenar(texto string, tipo string) string {
-	file1, err1 := os.Open("DATA.txt")
-
-	if err1 != nil {
-		log.Fatalf("failed creating file: %s", err1)
-	}
-
-	Split_Msj := strings.Split(texto, "\n")
-
-	var lista []string
-
-	scanner := bufio.NewScanner(file1)
-
-	for scanner.Scan() {
-
-		Split_Msj1 := strings.Split(scanner.Text(), ":")
-
-		if Split_Msj1[0] == tipo {
-			lista = append(lista, Split_Msj1[1])
-		}
-	}
-
-	resultado := ""
-
-	n := len(lista)
-	m := len(Split_Msj)
-
-	for i := 0; i < n; i++ {
-
-		for p := 0; p < m; p++ {
-
-			sp := strings.Split(Split_Msj[p], ":")
-			if lista[i] == sp[0] {
-				resultado = resultado + Split_Msj[p] + "\n"
-			}
-
-		}
-	}
-
-	file1.Close()
-
-	return resultado
-}
-
-//Se revisa si el ID del Dato esta ya registrado
-func RevisarID(ID string) bool {
-
-	file1, err1 := os.Open("DATA.txt")
-
-	if err1 != nil {
-		log.Fatalf("failed creating file: %s", err1)
-	}
-
-	scanner := bufio.NewScanner(file1)
-
-	for scanner.Scan() {
-
-		Split_Msj := strings.Split(scanner.Text(), ":")
-		if Split_Msj[1] == ID {
-
-			return false
-
-		}
-	}
-
-	file1.Close()
-	return true
-
-}
-
 //Se retorna un DatoNode con su ip al azar para guardar la data
-func DateNodeRandom() (Nombre_DateNode string, IP string) {
+func ServidorRandom() (Nombre_DateNode string, IP string) {
 	rand.Seed(time.Now().UnixNano())
 	switch os := rand.Intn(3); os {
 	case 0:
-		Nombre := "DateNode Grunt"
+		Nombre := "Servidor Tierra"
 		IP := "dist042:50051"
 		return Nombre, IP
 	case 1:
@@ -149,8 +73,8 @@ func GuardarDATA(data string) {
 		panic("No se puede crear el mensaje " + err.Error())
 	}
 
-	fmt.Println(res.Body)       //respuesta del laboratorio
-	time.Sleep(1 * time.Second) 
+	fmt.Println(res.Body) //respuesta del laboratorio
+	time.Sleep(1 * time.Second)
 
 }
 
@@ -282,50 +206,10 @@ type server struct {
 //Se maneja el intercambio de mensajes
 func (s *server) Intercambio(ctx context.Context, msg *pb.Message) (*pb.Message, error) {
 
-	msn := ""
-	Split_Msj := strings.Split(msg.Body, ":")
-	
-	//Se maneja peticiones de Conbine
-
-	if Split_Msj[0] == "0" {
-		ID := Split_Msj[2]
-		Info := Split_Msj[1] + ":" + Split_Msj[2] + ":" + Split_Msj[3]
-		if RevisarID(ID) == true {
-			GuardarDATA(Info)
-			msn = "Mensaje enviado exitosamente"
-
-		} else {
-			msn = "ID Repetido"
-		}
-
-		println("Solicitud desde Combine recibida, mensaje enviado: " + msn)
-
-	}
-	//Se maneja peticiones de Rebeldes
-	if Split_Msj[0] == "1" { 
-		msn = Fetch_Rebeldes(Split_Msj[1])
-
-		println("Solicitud desde Rebelde pidiendo datos de " + Split_Msj[1] + ", mensaje enviado: " + msn)
-
-	}
-	//Se maneja el cierre de los programas
-
-	if msg.Body == "CIERRE" {
-		Cierre()
-		msn = "DATANODES CERRADOS EXITOSAMENTE, NAMENODE CERRANDO ... >> "
-		return &pb.Message{Body: msn}, nil
-		
-	}
-	if msg.Body == "END" {
-		os.Exit(1)
-	}
-
 	return &pb.Message{Body: msn}, nil
 }
 
 func main() {
-
-	defer file.Close()
 
 	listener, err := net.Listen("tcp", ":50051") //conexion sincrona
 	if err != nil {
