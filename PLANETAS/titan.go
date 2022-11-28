@@ -21,16 +21,16 @@ type server struct {
 func (s *server) Intercambio(ctx context.Context, msg *pb.Message) (*pb.Message, error) {
 
 	Split_Msj := strings.Split(msg.Body, " ")
-	print(Split_Msj[0])
 	var msn string
 
 	switch Split_Msj[0] {
 	case "0":
 		//Vanguardia
-		print(msg.Body)
+		print("Peticion Vanguardia" + msg.Body + "\n")
 		msn = "Modificacion Hecha"
 	case "1":
 		//Guardianes
+		print("Peticion Guardianes" + msg.Body + "\n")
 		Sector := Split_Msj[2]
 		Base := Split_Msj[3]
 		num := BuscarCantidad(Sector, Base)
