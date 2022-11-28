@@ -46,11 +46,12 @@ func ServidorRandom() (Nombre_DateNode string, IP string) {
 		Nombre := "ServidorMarte"
 		IP := "dist043:50051"
 		return Nombre, IP
-	default:
+	case 3:
 		Nombre := "ServidorTitan"
 		IP := "dist044:50051"
 		return Nombre, IP
 	}
+	return " ", " "
 }
 
 func NombreServer(ip string) string {
@@ -65,7 +66,7 @@ func NombreServer(ip string) string {
 		Nombre := "ServidorTitan"
 		return Nombre
 	}
-	return ""
+	return " "
 
 }
 
