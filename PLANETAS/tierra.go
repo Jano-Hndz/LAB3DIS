@@ -12,6 +12,11 @@ import (
 
 var reloj = []int{0, 0, 0}
 
+func BuscarCantidad(Sector string, Base string) string {
+	print("Buscando en " + Sector + "---" + Base + "\n")
+	return "1111"
+}
+
 //Estructura para usar con facilidad el server
 type server struct {
 	pb.UnimplementedMessageServiceServer

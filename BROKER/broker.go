@@ -40,15 +40,15 @@ func ServidorRandom() (Nombre_DateNode string, IP string) {
 	switch os := rand.Intn(3); os {
 	case 0:
 		Nombre := "ServidorTierra"
-		IP := "dist042:50051"
+		IP := "dist042:50052"
 		return Nombre, IP
 	case 1:
 		Nombre := "ServidorMarte"
-		IP := "dist043:50051"
+		IP := "dist043:50052"
 		return Nombre, IP
 	case 2:
 		Nombre := "ServidorTitan"
-		IP := "dist044:50051"
+		IP := "dist044:50052"
 		return Nombre, IP
 	}
 	return " ", " "
