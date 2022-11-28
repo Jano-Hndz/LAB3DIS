@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"net"
-	"os"
 	"strings"
 
 	pb "github.com/Kendovvul/Ejemplo/Proto"
@@ -18,35 +17,27 @@ type server struct {
 //Se maneja el intercambio de mensajes
 func (s *server) Intercambio(ctx context.Context, msg *pb.Message) (*pb.Message, error) {
 
-	msn := ""
+	Split_Msj := strings.Split(msg.Body, " ")
+	print(Split_Msj[0])
+	var msn string
 
-	Split_Msj := strings.Split(msg.Body, ":")
-	//Se maneja peticiones de Rebeldes
-	if Split_Msj[0] == "1" {
-		msn = RetornarData(Split_Msj[1])
-		println("Solicitud de NameNode recibida, mensaje enviado:" + msn)
+	switch Split_Msj[0] {
+	case "0":
+		//Vanguardia
+		print(msg.Body)
+		msn = "Modificacion Hecha"
+	case "1":
+		//Guardianes
 
-	}
-	//Se maneja peticiones de Combine
-	if Split_Msj[0] == "0" {
+	case "2":
+		//Replicacion
 
-		data := Split_Msj[1] + ":" + Split_Msj[2] + ":" + Split_Msj[3] + "\n"
-		file.WriteString(data)
-		msn = "Guardado"
-
-		println("Dato guardado: " + data)
-
-	}
-	//Se maneja el cierre del programa
-	if msg.Body == "CIERRE" {
-		os.Exit(1)
 	}
 
 	return &pb.Message{Body: msn}, nil
 
 }
 
-//Main "DateNode Grunt"
 func main() {
 
 	listener, err := net.Listen("tcp", ":50051") //conexion sincrona
@@ -55,8 +46,6 @@ func main() {
 	}
 
 	serv := grpc.NewServer()
-
-	defer file.Close()
 
 	for {
 		pb.RegisterMessageServiceServer(serv, &server{})
