@@ -79,7 +79,9 @@ func main() {
 			panic("No se puede crear el mensaje " + err.Error())
 		}
 
-		print(res.Body)
+		print("-----" + res.Body)
+
+		ip = res.Body
 	}
 
 }

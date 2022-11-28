@@ -46,7 +46,7 @@ func ServidorRandom() (Nombre_DateNode string, IP string) {
 		Nombre := "ServidorMarte"
 		IP := "dist043:50051"
 		return Nombre, IP
-	case 3:
+	case 2:
 		Nombre := "ServidorTitan"
 		IP := "dist044:50051"
 		return Nombre, IP
@@ -77,15 +77,12 @@ type server struct {
 
 //Se maneja el intercambio de mensajes
 func (s *server) Intercambio(ctx context.Context, msg *pb.Message) (*pb.Message, error) {
-	var msn string
+	msn := "  "
 	Split_Msj := strings.Split(msg.Body, " ")
-
-	if Split_Msj[0] == "0" {
-
-		//Peticion Vanguardia
-		var nombre string
-		var ip string
-
+	var nombre string
+	var ip string
+	switch Split_Msj[0] {
+	case "0": //Peticion Vanguardia
 		if Split_Msj[1] == "0" {
 			nombre, ip = ServidorRandom()
 		} else {
@@ -95,12 +92,15 @@ func (s *server) Intercambio(ctx context.Context, msg *pb.Message) (*pb.Message,
 
 		print(msg.Body + "\n" + ip + "->" + nombre)
 
-		msn := EnviarPeticion(ip, msg.Body)
+		msn = EnviarPeticion(ip, msg.Body)
 
-		print(msn)
+		print("Retorno" + msn + "\n")
+		return &pb.Message{Body: ip}, nil
 
-	} else {
-		//Peticion Guardianes
+	case "1": //Peticion Guardianes
+		nombre, ip = ServidorRandom()
+		msn = EnviarPeticion(ip, msg.Body)
+		return &pb.Message{Body: msn}, nil
 	}
 
 	return &pb.Message{Body: msn}, nil
@@ -115,6 +115,7 @@ func main() {
 	}
 
 	serv := grpc.NewServer()
+	print("Broker inicado")
 	for {
 		pb.RegisterMessageServiceServer(serv, &server{})
 		if err = serv.Serve(listener); err != nil {
