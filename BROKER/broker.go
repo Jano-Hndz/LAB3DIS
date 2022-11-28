@@ -65,6 +65,7 @@ func NombreServer(ip string) string {
 		Nombre := "ServidorTitan"
 		return Nombre
 	}
+	return ""
 
 }
 
